@@ -28,15 +28,15 @@ INTERVAL = 3600 * 3
 
 
 def run():
-    while True:
-        try:
+    # while True:
+    #     try:
             crawl_cargoDeparture()
             crawl_cargoArrival()
             crawl_passengerDeparture()
             crawl_passengerArrival()
-        except:
-            pass
-        time.sleep(INTERVAL)
+        # except:
+        #     pass
+        # time.sleep(INTERVAL)
 
 
 def get_htmlPage(url, isCargo=False):
