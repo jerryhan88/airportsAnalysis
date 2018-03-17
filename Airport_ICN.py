@@ -32,7 +32,7 @@ DOWN_WAIT_SEC = 2
 tripStr = lambda _s: _s.replace('\n', '').replace('\t', '')
 
 
-INTERVAL = 3600 * 0.5
+INTERVAL = 3600 * 1
 
 
 def run():
