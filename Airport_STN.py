@@ -1,7 +1,8 @@
 import os.path as opath
 import os
 from functools import reduce
-import datetime, time
+from datetime import datetime, timedelta
+import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -10,17 +11,15 @@ from bs4 import BeautifulSoup
 import csv
 #
 IATA = 'STN'
-
-path_join = lambda prefix, name: opath.join(prefix, name)
 create_dir = lambda dpath: os.mkdir(dpath) if not opath.exists(dpath) else -1
-DATA_HOME = reduce(path_join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
+DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
 
 create_dir(DATA_HOME)
 dpaths = {}
 for forWhat in ['Cargo', 'Passenger']:
     create_dir(opath.join(DATA_HOME, forWhat))
     for direction in ['Arrival', 'Departure']:
-        dpath = reduce(path_join, [DATA_HOME, forWhat, direction])
+        dpath = reduce(opath.join, [DATA_HOME, forWhat, direction])
         create_dir(dpath)
         dpaths[forWhat, direction] = dpath
 
@@ -60,7 +59,7 @@ def get_htmlPage(url, isCargo=False):
 
 
 def crawl_cargoDeparture():
-    dt = datetime.datetime.today() - datetime.timedelta(days=1)
+    dt = datetime.today() - timedelta(days=1)
     fpath = opath.join(dpaths['Cargo', 'Departure'],
                        '%s-CD-%d%02d%02d.csv' % (IATA, dt.year, dt.month, dt.day))
     direction = 'departures'
@@ -69,7 +68,7 @@ def crawl_cargoDeparture():
 
 
 def crawl_cargoArrival():
-    dt = datetime.datetime.today() - datetime.timedelta(days=1)
+    dt = datetime.today() - timedelta(days=1)
     fpath = opath.join(dpaths['Cargo', 'Arrival'],
                        '%s-CA-%d%02d%02d.csv' % (IATA, dt.year, dt.month, dt.day))
     direction = 'arrivals'
@@ -122,9 +121,9 @@ def handle_cargoFlights(fpath, direction):
 
 
 def crawl_passengerDeparture():
-    dt = datetime.datetime.today() - datetime.timedelta(days=1)
+    dt = datetime.today() - timedelta(days=1)
     fpath = opath.join(dpaths['Passenger', 'Departure'],
-                       '%s-PA-%d%02d%02d.csv' % (IATA, dt.year, dt.month, dt.day))
+                       '%s-PD-%d%02d%02d.csv' % (IATA, dt.year, dt.month, dt.day))
     url = 'http://www.changiairport.com/en/flight/departures.html?term=&schtime=&date=yesterday&time=all'
     html_page = get_htmlPage(url)
     soup = BeautifulSoup(html_page)
@@ -168,7 +167,7 @@ def crawl_passengerDeparture():
             writer.writerow(new_row)
 
 def crawl_passengerArrival():
-    dt = datetime.datetime.today() - datetime.timedelta(days=1)
+    dt = datetime.today() - timedelta(days=1)
     fpath = opath.join(dpaths['Passenger', 'Arrival'],
                        '%s-PA-%d%02d%02d.csv' % (IATA, dt.year, dt.month, dt.day))
     url = 'http://www.changiairport.com/en/flight/arrivals.html?term=&schtime=&date=yesterday&time=all'
