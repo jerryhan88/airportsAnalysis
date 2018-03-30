@@ -95,7 +95,7 @@ def handle_flightsInfo(fpath, purpose, direction):
         writer.writerow(new_header)
     url = 'https://www.taoyuan-airport.com/english/%s_%s' % (purpose, direction)
     html_page = get_htmlPage(url)
-    soup = BeautifulSoup(html_page)
+    soup = BeautifulSoup(html_page, "html.parser")
     all_entities = soup.find_all('tr')
     for i, row in enumerate(all_entities):
         if i < 7:
