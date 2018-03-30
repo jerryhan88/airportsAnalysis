@@ -58,7 +58,7 @@ def crawl_cargoInfo(url):
 def crawl_cargoDeparture():
     dt = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz.gettz('Asia/Seoul'))
     fpath = opath.join(dpaths['Cargo', 'Departure'],
-                       '%s-CA-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
+                       '%s-CD-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
     url = 'https://www.airport.kr/ap/en/dep/depCargoSchList.do'
     html_page = crawl_cargoInfo(url)
     soup = BeautifulSoup(html_page)
