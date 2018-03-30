@@ -23,6 +23,7 @@ for forWhat in ['Cargo', 'Passenger']:
         dpaths[forWhat, direction] = dpath
 
 INTERVAL = 3600 * 1
+WAITING_TIME = 10
 
 
 def run():
@@ -32,9 +33,11 @@ def run():
             crawl_cargoArrival()
             crawl_passengerDeparture()
             crawl_passengerArrival()
+            time.sleep(INTERVAL)
         except:
-            pass
-        time.sleep(INTERVAL)
+            time.sleep(INTERVAL)
+            run()
+
 
 def crawl_cargoDeparture():
     dt = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz.gettz('Asia/Taipei'))
@@ -75,8 +78,7 @@ def crawl_passengerArrival():
 def get_htmlPage(url):
     wd = webdriver.Firefox(executable_path=os.getcwd() + '/geckodriver')
     wd.get(url)
-    # WebDriverWait(wd, 5)
-    time.sleep(5)
+    time.sleep(WAITING_TIME)
     html_page = wd.page_source
     wd.quit()
     return html_page
