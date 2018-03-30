@@ -213,4 +213,5 @@ def crawl_passengerArrival():
 
 
 if __name__ == '__main__':
+    print('Crawling %s' % IATA)
     run()
