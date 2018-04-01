@@ -32,7 +32,7 @@ DOWN_WAIT_SEC = 2
 tripStr = lambda _s: _s.replace('\n', '').replace('\t', '')
 
 
-INTERVAL = 3600 * 1
+INTERVAL = 3600 * 0.5
 
 
 def run():
@@ -42,9 +42,10 @@ def run():
             crawl_cargoArrival()
             crawl_passengerDeparture()
             crawl_passengerArrival()
+            time.sleep(INTERVAL)
         except:
-            pass
-        time.sleep(INTERVAL)
+            time.sleep(INTERVAL)
+            run()
 
 def crawl_cargoInfo(url):
     wd = webdriver.Chrome(executable_path=os.getcwd() + '/chromedriver')
