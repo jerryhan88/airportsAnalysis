@@ -1,5 +1,6 @@
 import multiprocessing
 import datetime, time
+from traceback import format_exc
 #
 from __commons import DATA_COL_INTERVAL
 #
@@ -26,6 +27,9 @@ def run():
             try:
                 crawlingFunc()
             except:
+                with open('crawling_errors.txt', 'a') as f:
+                    f.write('%s \n Airport %s\n' % (datetime.datetime.now(), IATA))
+                    f.write(format_exc())
                 crawling_failed[IATA] = crawlingFunc
         if crawling_failed:
             for IATA, crawlingFunc in crawling_failed.items():

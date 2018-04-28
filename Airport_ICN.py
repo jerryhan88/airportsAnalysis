@@ -13,7 +13,12 @@ DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
 DIR_PATHS = get_dpaths(DATA_HOME)
 #
 
-get_text = lambda row, attr: row.find('div', {'class': attr}).get_text()
+
+def get_text(row, attr):
+    if row.find('div', {'class': attr}):
+        return row.find('div', {'class': attr}).get_text()
+    else:
+        return ''
 
 
 def crawler_run():
@@ -25,17 +30,22 @@ def crawler_run():
 
 
 def run():
-    while True:
-        try:
-            loc_dt = get_loc_dt('Asia/Seoul')
-            crawl_PD(loc_dt)
-            crawl_PA(loc_dt)
-            crawl_CD(loc_dt)
-            crawl_CA(loc_dt)
-            time.sleep(DATA_COL_INTERVAL)
-        except:
-            time.sleep(DATA_COL_INTERVAL)
-            run()
+    loc_dt = get_loc_dt('Asia/Seoul')
+    crawl_PD(loc_dt)
+    crawl_PA(loc_dt)
+    crawl_CD(loc_dt)
+    crawl_CA(loc_dt)
+    # while True:
+    #     try:
+    #         loc_dt = get_loc_dt('Asia/Seoul')
+    #         crawl_PD(loc_dt)
+    #         crawl_PA(loc_dt)
+    #         crawl_CD(loc_dt)
+    #         crawl_CA(loc_dt)
+    #         time.sleep(DATA_COL_INTERVAL)
+    #     except:
+    #         time.sleep(DATA_COL_INTERVAL)
+    #         run()
 
 
 def crawl_PD(dt):
