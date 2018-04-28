@@ -28,6 +28,7 @@ def run():
     while True:
         crawling_failed = {}
         for IATA, crawlingFunc in IATA_crawlingFunc.items():
+            print('%s \n Airport %s\n' % (datetime.datetime.now(), IATA))
             try:
                 crawlingFunc()
             except:

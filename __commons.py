@@ -33,6 +33,9 @@ def get_dpaths(data_home):
             dpath = reduce(opath.join, [data_home, forWhat, direction])
             mkdir(dpath)
             dpaths[forWhat, direction] = dpath
+    dpath = reduce(opath.join, [data_home, 'Summary'])
+    mkdir(dpath)
+    dpaths['Summary'] = dpath
     return dpaths
 
 

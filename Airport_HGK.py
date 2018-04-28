@@ -127,6 +127,10 @@ def get_airlinesNflights(row):
     return ';'.join(airlines), ';'.join(flights)
 
 
+# def arrange_data():
+
+
+
 if __name__ == '__main__':
     print('Crawling %s' % IATA)
     run()
