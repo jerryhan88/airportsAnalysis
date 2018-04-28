@@ -36,7 +36,7 @@ def get_dpaths(data_home):
     return dpaths
 
 
-def get_html_elements_by_time(url):
+def get_html_elements_byTime(url):
     wd = webdriver.Chrome(executable_path=os.getcwd() + '/chromedriver')
     wd.get(url)
     time.sleep(PAGE_LOADING_WAITING_TIME)
@@ -47,10 +47,29 @@ def get_html_elements_by_time(url):
     return html_elements
 
 
-def get_html_elements_by_condition(url, condition):
+def get_html_elements_byID(url, idLabel):
     wd = webdriver.Chrome(executable_path=os.getcwd() + '/chromedriver')
     wd.get(url)
-    WebDriverWait(wd, TIME_OUT).until(EC.presence_of_all_elements_located(condition))
+    WebDriverWait(wd, TIME_OUT).until(EC.presence_of_all_elements_located((By.ID, idLabel)))
+    html_page = wd.page_source
+    wd.quit()
+    #
+    html_elements = BeautifulSoup(html_page, "html.parser")
+    return html_elements
+
+
+def get_html_elements_byTAG(url, tagLabel, isCargo=False):
+    wd = webdriver.Firefox(executable_path=os.getcwd() + '/geckodriver')
+    wd.get(url)
+    WebDriverWait(wd, TIME_OUT).until(
+        EC.presence_of_all_elements_located((By.TAG_NAME, tagLabel)))
+    if isCargo:
+        # Click switcher
+        switcher = wd.find_element_by_class_name('switchery')
+        while not switcher.is_selected():
+            wd.execute_script("arguments[0].click();", switcher)
+        WebDriverWait(wd, TIME_OUT).until(
+            EC.presence_of_all_elements_located((By.TAG_NAME, tagLabel)))
     html_page = wd.page_source
     wd.quit()
     #

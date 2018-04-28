@@ -1,9 +1,12 @@
-from __commons import *
-#
 import os.path as opath
-import os
 import time
 from functools import reduce
+#
+from __commons import get_dpaths, get_loc_dt
+from __commons import get_html_elements_byID
+from __commons import init_csv_file, append_new_record2csv
+from __commons import trim_str
+from __commons import DATA_COL_INTERVAL
 #
 IATA = 'ICN'
 DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
@@ -11,6 +14,14 @@ DIR_PATHS = get_dpaths(DATA_HOME)
 #
 
 get_text = lambda row, attr: row.find('div', {'class': attr}).get_text()
+
+
+def crawler_run():
+    loc_dt = get_loc_dt('Asia/Seoul')
+    crawl_PD(loc_dt)
+    crawl_PA(loc_dt)
+    crawl_CD(loc_dt)
+    crawl_CA(loc_dt)
 
 
 def run():
@@ -35,7 +46,7 @@ def crawl_PD(dt):
                   'Terminal', 'Check-in Counter', 'Gate', 'Status']
     init_csv_file(fpath, new_header)
     url = 'https://www.airport.kr/ap/en/dep/depPasSchList.do'
-    html_elements = get_html_elements_by_condition(url, (By.ID, 'div-result-list'))
+    html_elements = get_html_elements_byID(url, 'div-result-list')
     all_entities = html_elements.find_all('div', {'class': 'flight-wrap'})
     for i, row in enumerate(all_entities):
         destination, terminal, checkInCounter, gate = [trim_str(ele.get_text()) for ele in
@@ -67,7 +78,7 @@ def crawl_PA(dt):
     init_csv_file(fpath, new_header)
     #
     url = 'https://www.airport.kr/ap/en/arr/arrPasSchList.do'
-    html_elements = get_html_elements_by_condition(url, (By.ID, 'div-result-list'))
+    html_elements = get_html_elements_byID(url, 'div-result-list')
     all_entities = html_elements.find_all('div', {'class': 'flight-wrap'})
     for i, row in enumerate(all_entities):
         startingPoint, terminal, arrivalGate, baggageClaim, exit_ = [trim_str(ele.get_text()) for ele in
@@ -98,7 +109,7 @@ def crawl_CD(dt):
     init_csv_file(fpath, new_header)
     #
     url = 'https://www.airport.kr/ap/en/dep/depCargoSchList.do'
-    html_elements = get_html_elements_by_condition(url, (By.ID, 'div-result-list'))
+    html_elements = get_html_elements_byID(url, 'div-result-list')
     all_entities = html_elements.find_all('div', {'class': 'flight-wrap'})
     for i, row in enumerate(all_entities):
         destination, terminal, flightTerminal = [trim_str(ele.get_text()) for ele in
@@ -127,7 +138,7 @@ def crawl_CA(dt):
     init_csv_file(fpath, new_header)
     #
     url = 'https://www.airport.kr/ap/en/arr/arrCargoSchList.do'
-    html_elements = get_html_elements_by_condition(url, (By.ID, 'div-result-list'))
+    html_elements = get_html_elements_byID(url, 'div-result-list')
     all_entities = html_elements.find_all('div', {'class': 'flight-wrap'})
     for i, row in enumerate(all_entities):
         startingPoint, terminal, ledge = [trim_str(ele.get_text()) for ele in

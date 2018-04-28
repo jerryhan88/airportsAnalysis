@@ -1,8 +1,24 @@
-from __commons import *
+import os.path as opath
+import time
+from functools import reduce
+#
+from __commons import get_dpaths, get_loc_dt
+from __commons import get_html_elements_byTime
+from __commons import init_csv_file, append_new_record2csv
+from __commons import trim_str
+from __commons import DATA_COL_INTERVAL
 #
 IATA = 'TPE'
 DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
 DIR_PATHS = get_dpaths(DATA_HOME)
+
+
+def crawler_run():
+    loc_dt = get_loc_dt('Asia/Taipei')
+    crawl_PD(loc_dt)
+    crawl_PA(loc_dt)
+    crawl_CD(loc_dt)
+    crawl_CA(loc_dt)
 
 
 def run():
@@ -60,7 +76,7 @@ def handle_flightsInfo(fpath, purpose, direction):
     init_csv_file(fpath, new_header)
     #
     url = 'https://www.taoyuan-airport.com/english/%s_%s' % (purpose, direction)
-    html_elements = get_html_elements_by_time(url)
+    html_elements = get_html_elements_byTime(url)
     all_entities = html_elements.find_all('tr')
     for i, row in enumerate(all_entities):
         if i < 7:

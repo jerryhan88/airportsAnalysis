@@ -1,10 +1,26 @@
-from __commons import *
+import os.path as opath
+import time
+from functools import reduce
+#
+from __commons import get_dpaths, get_loc_dt
+from __commons import get_html_elements_byTime
+from __commons import init_csv_file, append_new_record2csv
+from __commons import DATA_COL_INTERVAL
 #
 IATA = 'HGK'
 DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
 DIR_PATHS = get_dpaths(DATA_HOME)
 
 get_text = lambda row, dataName: row.find('td', {'class': '%sData' % dataName}).get_text()
+
+
+def crawler_run():
+    loc_dt = get_loc_dt('Asia/Hong_Kong')
+    crawl_PD(loc_dt)
+    crawl_PA(loc_dt)
+    crawl_CD(loc_dt)
+    crawl_CA(loc_dt)
+
 
 def run():
     while True:
@@ -95,7 +111,7 @@ def crawl_cargoInfo(direction, fpath):
 
 def get_HGK_entities(forWhat, direction):
     url = 'http://www.hongkongairport.com/en/flights/%s/%s.page' % (direction, forWhat)
-    html_elements = get_html_elements_by_time(url)
+    html_elements = get_html_elements_byTime(url)
     all_entities = html_elements.find_all('tr', {'class': 'data'})
     #
     return all_entities
@@ -109,9 +125,6 @@ def get_airlinesNflights(row):
         flights.append(flight)
     #
     return ';'.join(airlines), ';'.join(flights)
-
-
-
 
 
 if __name__ == '__main__':

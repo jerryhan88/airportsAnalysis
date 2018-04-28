@@ -1,8 +1,24 @@
-from __commons import *
+import os.path as opath
+import time
+from functools import reduce
+from datetime import timedelta
+#
+from __commons import get_dpaths, get_loc_dt
+from __commons import init_csv_file, append_new_record2csv
+from __commons import get_html_elements_byTAG
+from __commons import DATA_COL_INTERVAL
 #
 IATA = 'SIN'
 DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
 DIR_PATHS = get_dpaths(DATA_HOME)
+
+
+def crawler_run():
+    loc_dt = get_loc_dt('Asia/Singapore')
+    crawl_PD(loc_dt)
+    crawl_PA(loc_dt)
+    crawl_CD(loc_dt)
+    crawl_CA(loc_dt)
 
 
 def run():
@@ -16,23 +32,6 @@ def run():
         except:
             pass
         time.sleep(DATA_COL_INTERVAL)
-
-
-def get_htmlPage(url, isCargo=False):
-    wd = webdriver.Firefox(executable_path=os.getcwd() + '/geckodriver')
-    wd.get(url)
-    WebDriverWait(wd, TIME_OUT).until(
-        EC.presence_of_all_elements_located((By.TAG_NAME, 'table')))
-    if isCargo:
-        # Click switcher
-        switcher = wd.find_element_by_class_name('switchery')
-        while not switcher.is_selected():
-            wd.execute_script("arguments[0].click();", switcher)
-        WebDriverWait(wd, TIME_OUT).until(
-            EC.presence_of_all_elements_located((By.TAG_NAME, 'table')))
-    html_page = wd.page_source
-    wd.quit()
-    return html_page
 
 
 def crawl_CD(dt):
@@ -61,10 +60,8 @@ def handle_cargoFlights(fpath, direction):
     init_csv_file(fpath, new_header)
     #
     url = 'http://www.changiairport.com/en/flight/%s.html?term=&schtime=&date=yesterday&time=all' % direction
-    html_page = get_htmlPage(url, isCargo=True)
-    soup = BeautifulSoup(html_page, "html.parser")
-    all_entities = soup.find_all('tr')
-
+    html_elements = get_html_elements_byTAG(url, 'table', isCargo=True)
+    all_entities = html_elements.find_all('tr')
     for i, row in enumerate(all_entities):
         if i < 3:
             continue
@@ -103,9 +100,8 @@ def crawl_PD(dt):
     init_csv_file(fpath, new_header)
     #
     url = 'http://www.changiairport.com/en/flight/departures.html?term=&schtime=&date=yesterday&time=all'
-    html_page = get_htmlPage(url)
-    soup = BeautifulSoup(html_page)
-    all_entities = soup.find_all('tr')
+    html_elements = get_html_elements_byTAG(url, 'table')
+    all_entities = html_elements.find_all('tr')
     for i, row in enumerate(all_entities):
         if i < 3:
             continue
@@ -146,9 +142,8 @@ def crawl_PA(dt):
     init_csv_file(fpath, new_header)
     #
     url = 'http://www.changiairport.com/en/flight/arrivals.html?term=&schtime=&date=yesterday&time=all'
-    html_page = get_htmlPage(url)
-    soup = BeautifulSoup(html_page)
-    all_entities = soup.find_all('tr')
+    html_elements = get_html_elements_byTAG(url, 'table')
+    all_entities = html_elements.find_all('tr')
     for i, row in enumerate(all_entities):
         if i < 3:
             continue
