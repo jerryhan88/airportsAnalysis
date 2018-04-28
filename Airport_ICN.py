@@ -30,22 +30,17 @@ def crawler_run():
 
 
 def run():
-    loc_dt = get_loc_dt('Asia/Seoul')
-    crawl_PD(loc_dt)
-    crawl_PA(loc_dt)
-    crawl_CD(loc_dt)
-    crawl_CA(loc_dt)
-    # while True:
-    #     try:
-    #         loc_dt = get_loc_dt('Asia/Seoul')
-    #         crawl_PD(loc_dt)
-    #         crawl_PA(loc_dt)
-    #         crawl_CD(loc_dt)
-    #         crawl_CA(loc_dt)
-    #         time.sleep(DATA_COL_INTERVAL)
-    #     except:
-    #         time.sleep(DATA_COL_INTERVAL)
-    #         run()
+    while True:
+        try:
+            loc_dt = get_loc_dt('Asia/Seoul')
+            crawl_PD(loc_dt)
+            crawl_PA(loc_dt)
+            crawl_CD(loc_dt)
+            crawl_CA(loc_dt)
+            time.sleep(DATA_COL_INTERVAL)
+        except:
+            time.sleep(DATA_COL_INTERVAL)
+            run()
 
 
 def crawl_PD(dt):
