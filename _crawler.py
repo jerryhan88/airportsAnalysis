@@ -1,5 +1,7 @@
+import os.path as opath
 import multiprocessing
 import datetime, time
+from functools import reduce
 from traceback import format_exc
 #
 from __commons import DATA_COL_INTERVAL
@@ -10,6 +12,8 @@ from Airport_PUS import crawler_run as crawling_PUS
 from Airport_SIN import crawler_run as crawling_SIN
 from Airport_TPE import crawler_run as crawling_TPE
 
+DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data'])
+ce_fpath = opath.join(DATA_HOME, 'crawling_errors.txt')
 
 IATA_crawlingFunc = {
     'HGK': crawling_HGK,
@@ -27,7 +31,8 @@ def run():
             try:
                 crawlingFunc()
             except:
-                with open('crawling_errors.txt', 'a') as f:
+                print('Exception ', IATA)
+                with open(ce_fpath, 'a') as f:
                     f.write('%s \n Airport %s\n' % (datetime.datetime.now(), IATA))
                     f.write(format_exc())
                 crawling_failed[IATA] = crawlingFunc
