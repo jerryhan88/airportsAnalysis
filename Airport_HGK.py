@@ -1,5 +1,6 @@
 import os.path as opath
-import time
+import os
+import datetime, time
 from functools import reduce
 #
 from __commons import get_dpaths, get_loc_dt
@@ -127,10 +128,187 @@ def get_airlinesNflights(row):
     return ';'.join(airlines), ';'.join(flights)
 
 
-# def arrange_data():
 
+import csv
+
+def summary_all_PD():
+    dpath = DIR_PATHS['Passenger', 'Departure']
+    wd = 'PD'
+    targetYMD_fpaths = {}
+    for fn in sorted(os.listdir(dpath)):
+        if not fn.endswith('.csv'):
+            continue
+        _, _, dayHour = fn[:-len('.csv')].split('-')
+        ymd, hour = dayHour.split('H')
+        if ymd not in targetYMD_fpaths:
+            targetYMD_fpaths[ymd] = []
+        targetYMD_fpaths[ymd].append(fn)
+
+    header = ['Time', 'Airline', 'Flight', 'Destination', 'TG', 'Status']
+    for ymd, fns in targetYMD_fpaths.items():
+        FlightDest = set()
+        rows = []
+        for fn in sorted(fns, reverse=True):
+            year, month, day = map(int, [ymd[:len('yyyy')],
+                                         ymd[len('yyyy'):len('yyyymm')],
+                                         ymd[len('yyyymm'):]])
+            with open(opath.join(dpath, fn)) as r_csvfile:
+                reader = csv.DictReader(r_csvfile)
+                for row in reader:
+                    Flight, Destination = [row[cn] for cn in ['Flight', 'Destination']]
+                    Flight = ';'.join(sorted(Flight.split(';')))
+                    k = (Flight, Destination)
+                    if k in FlightDest:
+                        continue
+                    FlightDest.add(k)
+                    Time, Airline, Terminal, Gate, Status = [row[cn] for cn in
+                                                 ['Time', 'Airline', 'Terminal', 'Gate', 'Status']]
+                    hour, minute = map(int, Time.split(':'))
+                    dt = datetime.datetime(year, month, day, hour, minute)
+                    dt_row = (dt, [Time, Airline, Flight, Destination,
+                               '%s-%s' % (Terminal, Gate), Status])
+                    rows.append(dt_row)
+        #
+        ymd_fpath = opath.join(DIR_PATHS['Summary'], '%s-%s-%s.csv' % (ymd, wd, IATA))
+        init_csv_file(ymd_fpath, header)
+        for _, row in sorted(rows):
+            append_new_record2csv(ymd_fpath, row)
+
+
+def summary_all_PA():
+    dpath = DIR_PATHS['Passenger', 'Arrival']
+    wd = 'PA'
+    targetYMD_fpaths = {}
+    for fn in sorted(os.listdir(dpath)):
+        if not fn.endswith('.csv'):
+            continue
+        _, _, dayHour = fn[:-len('.csv')].split('-')
+        ymd, hour = dayHour.split('H')
+        if ymd not in targetYMD_fpaths:
+            targetYMD_fpaths[ymd] = []
+        targetYMD_fpaths[ymd].append(fn)
+
+    header = ['Time', 'Airline', 'Flight', 'Origin', 'TG', 'Status']
+    for ymd, fns in targetYMD_fpaths.items():
+        FlightOri = set()
+        rows = []
+        for fn in sorted(fns, reverse=True):
+            year, month, day = map(int, [ymd[:len('yyyy')],
+                                         ymd[len('yyyy'):len('yyyymm')],
+                                         ymd[len('yyyymm'):]])
+            with open(opath.join(dpath, fn)) as r_csvfile:
+                reader = csv.DictReader(r_csvfile)
+                for row in reader:
+                    Flight, Origin = [row[cn] for cn in ['Flight', 'Origin']]
+                    Flight = ';'.join(sorted(Flight.split(';')))
+                    k = (Flight, Origin)
+                    if k in FlightOri:
+                        continue
+                    FlightOri.add(k)
+                    Time, Airline, ParkingStand, Hall, Status = [row[cn] for cn in
+                                                 ['Time', 'Airline', 'ParkingStand', 'Hall', 'Status']]
+                    hour, minute = map(int, Time.split(':'))
+                    dt = datetime.datetime(year, month, day, hour, minute)
+                    dt_row = (dt, [Time, Airline, Flight, Origin,
+                               '%s-%s' % (Hall, ParkingStand), Status])
+                    rows.append(dt_row)
+        #
+        ymd_fpath = opath.join(DIR_PATHS['Summary'], '%s-%s-%s.csv' % (ymd, wd, IATA))
+        init_csv_file(ymd_fpath, header)
+        for _, row in sorted(rows):
+            append_new_record2csv(ymd_fpath, row)
+
+
+def summary_all_CD():
+    dpath = DIR_PATHS['Cargo', 'Departure']
+    wd = 'CD'
+    targetYMD_fpaths = {}
+    for fn in sorted(os.listdir(dpath)):
+        if not fn.endswith('.csv'):
+            continue
+        _, _, dayHour = fn[:-len('.csv')].split('-')
+        ymd, hour = dayHour.split('H')
+        if ymd not in targetYMD_fpaths:
+            targetYMD_fpaths[ymd] = []
+        targetYMD_fpaths[ymd].append(fn)
+
+    header = ['Time', 'Airline', 'Flight', 'Destination', 'Status']
+    for ymd, fns in targetYMD_fpaths.items():
+        FlightDest = set()
+        rows = []
+        for fn in sorted(fns, reverse=True):
+            year, month, day = map(int, [ymd[:len('yyyy')],
+                                         ymd[len('yyyy'):len('yyyymm')],
+                                         ymd[len('yyyymm'):]])
+            with open(opath.join(dpath, fn)) as r_csvfile:
+                reader = csv.DictReader(r_csvfile)
+                for row in reader:
+                    Flight, Destination = [row[cn] for cn in ['Flight', 'Destination']]
+                    Flight = ';'.join(sorted(Flight.split(';')))
+                    k = (Flight, Destination)
+                    if k in FlightDest:
+                        continue
+                    FlightDest.add(k)
+                    Time, Airline, Status = [row[cn] for cn in
+                                                 ['Time', 'Airline', 'Status']]
+                    hour, minute = map(int, Time.split(':'))
+                    dt = datetime.datetime(year, month, day, hour, minute)
+                    dt_row = (dt, [Time, Airline, Flight, Destination, Status])
+                    rows.append(dt_row)
+        #
+        ymd_fpath = opath.join(DIR_PATHS['Summary'], '%s-%s-%s.csv' % (ymd, wd, IATA))
+        init_csv_file(ymd_fpath, header)
+        for _, row in sorted(rows):
+            append_new_record2csv(ymd_fpath, row)
+
+
+
+def summary_all_CA():
+    dpath = DIR_PATHS['Cargo', 'Arrival']
+    wd = 'CA'
+    targetYMD_fpaths = {}
+    for fn in sorted(os.listdir(dpath)):
+        if not fn.endswith('.csv'):
+            continue
+        _, _, dayHour = fn[:-len('.csv')].split('-')
+        ymd, hour = dayHour.split('H')
+        if ymd not in targetYMD_fpaths:
+            targetYMD_fpaths[ymd] = []
+        targetYMD_fpaths[ymd].append(fn)
+
+    header = ['Time', 'Airline', 'Flight', 'Origin', 'Status']
+    for ymd, fns in targetYMD_fpaths.items():
+        FlightOri = set()
+        rows = []
+        for fn in sorted(fns, reverse=True):
+            year, month, day = map(int, [ymd[:len('yyyy')],
+                                         ymd[len('yyyy'):len('yyyymm')],
+                                         ymd[len('yyyymm'):]])
+            with open(opath.join(dpath, fn)) as r_csvfile:
+                reader = csv.DictReader(r_csvfile)
+                for row in reader:
+                    Flight, Origin = [row[cn] for cn in ['Flight', 'Origin']]
+                    Flight = ';'.join(sorted(Flight.split(';')))
+                    k = (Flight, Origin)
+                    if k in FlightOri:
+                        continue
+                    FlightOri.add(k)
+                    Time, Airline, Status = [row[cn] for cn in
+                                                 ['Time', 'Airline', 'Status']]
+                    hour, minute = map(int, Time.split(':'))
+                    dt = datetime.datetime(year, month, day, hour, minute)
+                    dt_row = (dt, [Time, Airline, Flight, Origin, Status])
+                    rows.append(dt_row)
+        #
+        ymd_fpath = opath.join(DIR_PATHS['Summary'], '%s-%s-%s.csv' % (ymd, wd, IATA))
+        init_csv_file(ymd_fpath, header)
+        for _, row in sorted(rows):
+            append_new_record2csv(ymd_fpath, row)
 
 
 if __name__ == '__main__':
-    print('Crawling %s' % IATA)
-    run()
+    # run()
+    # summary_all_PD()
+    # summary_all_PA()
+    # summary_all_CD()
+    summary_all_CA()
