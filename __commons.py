@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import csv
 
 
-DATA_COL_INTERVAL = 3600 * (1 / 6)
+DATA_COL_INTERVAL = 3600 * 0.5
 PAGE_LOADING_WAITING_TIME = 10
 TIME_OUT = 15
 
