@@ -9,7 +9,7 @@ from __commons import get_ymd, get_xSummaryYMD_fns
 from __commons import init_csv_file, append_new_record2csv, write_daySummary
 from __commons import trim_str
 #
-IATA = 'ICN0'
+IATA = 'ICN'
 DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
 DIR_PATHS = get_dpaths(DATA_HOME)
 #
