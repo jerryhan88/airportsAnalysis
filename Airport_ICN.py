@@ -1,12 +1,13 @@
 import os.path as opath
-import time
 from functools import reduce
+import datetime
+import csv
 #
 from __commons import get_dpaths, get_loc_dt
 from __commons import get_html_elements_byID
-from __commons import init_csv_file, append_new_record2csv
+from __commons import get_ymd, get_xSummaryYMD_fns
+from __commons import init_csv_file, append_new_record2csv, write_daySummary
 from __commons import trim_str
-from __commons import DATA_COL_INTERVAL
 #
 IATA = 'ICN'
 DATA_HOME = reduce(opath.join, [opath.expanduser('~'), 'Dropbox', 'Data', IATA])
@@ -29,18 +30,11 @@ def crawler_run():
     crawl_CA(loc_dt)
 
 
-def run():
-    while True:
-        try:
-            loc_dt = get_loc_dt('Asia/Seoul')
-            crawl_PD(loc_dt)
-            crawl_PA(loc_dt)
-            crawl_CD(loc_dt)
-            crawl_CA(loc_dt)
-            time.sleep(DATA_COL_INTERVAL)
-        except:
-            time.sleep(DATA_COL_INTERVAL)
-            run()
+def daySummary():
+    daySummary_PD()
+    # daySummary_PA()
+    # daySummary_CD()
+    # daySummary_CA()
 
 
 def crawl_PD(dt):
@@ -49,10 +43,11 @@ def crawl_PD(dt):
     new_header = ['departure time (original)', 'departure time (changed)',
                   'Destination', 'Airlines', 'Flight name',
                   'Terminal', 'Check-in Counter', 'Gate', 'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     url = 'https://www.airport.kr/ap/en/dep/depPasSchList.do'
     html_elements = get_html_elements_byID(url, 'div-result-list')
-    all_entities = html_elements.find_all('div', {'class': 'flight-wrap'})
+    all_entities = html_elements.find_all('div', {'class': 'flight-info-basic-link'})
     for i, row in enumerate(all_entities):
         destination, terminal, checkInCounter, gate = [trim_str(ele.get_text()) for ele in
                                                  row.find_all('div', {'class': 'td-like center'})]
@@ -80,11 +75,12 @@ def crawl_PA(dt):
     new_header = ['arrival time (original)', 'arrival time (changed)',
                   'Starting point', 'Airlines', 'Flight name', 
                   'Terminal', 'Arrival gate', 'Baggage claim', 'Exit', 'Arrival Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     url = 'https://www.airport.kr/ap/en/arr/arrPasSchList.do'
     html_elements = get_html_elements_byID(url, 'div-result-list')
-    all_entities = html_elements.find_all('div', {'class': 'flight-wrap'})
+    all_entities = html_elements.find_all('div', {'class': 'flight-info-basic-link'})
     for i, row in enumerate(all_entities):
         startingPoint, terminal, arrivalGate, baggageClaim, exit_ = [trim_str(ele.get_text()) for ele in
                                           row.find_all('div', {'class': 'td-like center'})]
@@ -111,7 +107,8 @@ def crawl_CD(dt):
 
     new_header = ['departure time (original)', 'departure time (changed)',
                   'Destination', 'Airlines', 'Flight name', 'Terminal', 'Flight Terminal', 'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     url = 'https://www.airport.kr/ap/en/dep/depCargoSchList.do'
     html_elements = get_html_elements_byID(url, 'div-result-list')
@@ -140,7 +137,8 @@ def crawl_CA(dt):
                        '%s-CA-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
     new_header = ['arrival time (original)', 'arrival time (changed)',
                   'Starting point', 'Airlines', 'Flight name', 'Terminal', 'A ledge', 'Arrival Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     url = 'https://www.airport.kr/ap/en/arr/arrCargoSchList.do'
     html_elements = get_html_elements_byID(url, 'div-result-list')
@@ -163,58 +161,61 @@ def crawl_CA(dt):
         new_row = [at_ori, at_changed, startingPoint, airline, flight_name, terminal, ledge, status]
         append_new_record2csv(fpath, new_row)
 
-
-# DOWN_WAIT_SEC = 2
-
-
-# def crawl_PA0(dt):
-#     down_fpath = opath.join(os.getcwd(), 'Passenger_Arrival_Schedule.xls')
-#     direction = 'arr'
-#     download_passFlightInfos(direction, down_fpath)
-#     #
-#     fpath = opath.join(DIR_PATHS['Passenger', 'Arrival'],
-#                       '%s-PA-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
-#     handle_xls(down_fpath, fpath)
-
-
-# def crawl_PD0(dt):
-#     down_fpath = opath.join(os.getcwd(), 'Passenger_Departure_Schedule.xls')
-#     direction = 'dep'
-#     download_passFlightInfos(direction, down_fpath)
-#     #
-#     fpath = opath.join(DIR_PATHS['Passenger', 'Departure'],
-#                        '%s-PD-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
-#     handle_xls(down_fpath, fpath)
-
-
-# def download_passFlightInfos(direction, down_fpath):
-#     url = 'https://www.airport.kr/ap/en/%s/%sPasSchList.do' % (direction, direction)
-#     chrome_options = webdriver.ChromeOptions()
-#     prefs = {'download.default_directory': os.getcwd()}
-#     chrome_options.add_experimental_option('prefs', prefs)
-#     wd = webdriver.Chrome(chrome_options=chrome_options, executable_path=os.getcwd() + '/chromedriver')
-#     wd.get(url)
-#     WebDriverWait(wd, TIME_OUT).until(EC.presence_of_all_elements_located((By.ID, 'div-result-list')))
-#     excelDown_btn = wd.find_element_by_id('excelDown')
-#     wd.execute_script("arguments[0].click();", excelDown_btn)
-#     while True:
-#         if opath.exists(down_fpath):
-#             wd.quit()
-#             break
-#         time.sleep(DOWN_WAIT_SEC)
-
-
-# def handle_xls(ifpath, ofpath):
-#     book = open_workbook(ifpath)
-#     sh = book.sheet_by_index(0)
-#     with open(ofpath, 'wt') as w_csvfile:
-#         writer = csv.writer(w_csvfile, lineterminator='\n')
-#         writer.writerow([sh.cell(0, j).value for j in range(sh.ncols)])
-#         for i in range(1, sh.nrows):
-#             writer.writerow([sh.cell(i, j).value for j in range(sh.ncols)])
-#     os.remove(ifpath)
+# S_PD_HEADER = ['Time', 'Airline', 'Flight', 'Destination', 'TG', 'Status']
+def daySummary_PD():
+    wd, dpath = 'PD', DIR_PATHS['Passenger', 'Departure']
+    xSummaryYMD_fns = get_xSummaryYMD_fns(dpath, DIR_PATHS['Summary'])
+    for ymd, fns in xSummaryYMD_fns.items():
+        FlightLoc, rows = set(), []
+        for fn in sorted(fns, reverse=True):
+            year, month, day = get_ymd(ymd)
+            with open(opath.join(dpath, fn)) as r_csvfile:
+                reader = csv.DictReader(r_csvfile)
+                for row1 in reader:
+                    Flight, Destination = [row1[cn] for cn in ['Flight name', 'Destination']]
+                    Flight = ';'.join(sorted(Flight.split(';')))
+                    k = (Flight, Destination)
+                    if k in FlightLoc:
+                        continue
+                    FlightLoc.add(k)
+                    Time, Airline, Terminal, Gate, Status = [row1[cn] for cn in
+                                                 ['departure time (changed)', 'Airlines', 'Terminal', 'Gate', 'Status']]
+                    hour, minute = map(int, Time.split(':'))
+                    dt = datetime.datetime(year, month, day, hour, minute)
+                    dt_row = (dt, [Time, Airline, Flight, Destination,
+                               '%s-%s' % (Terminal, Gate), Status])
+                    rows.append(dt_row)
+        #
+        new_rows = []
+        dt0, loc0, row0 = None, None, None
+        saving_Airlines, saving_Flights = [], []
+        for dt1, row1 in sorted(rows):
+            Airline, Flight, loc1 = [row1[i] for i in range(1, 4)]
+            if dt0 is None:
+                dt0, loc0, row0 = dt1, loc1, row1
+                saving_Airlines.append(Airline)
+                saving_Flights.append(Flight)
+                continue
+            if dt1 == dt0 and loc1 == loc0:
+                saving_Airlines.append(Airline)
+                saving_Flights.append(Flight)
+                continue
+            else:
+                dt_row = (dt0, [row0[0], ';'.join(saving_Airlines), ';'.join(saving_Flights),
+                                row0[3], row0[4], row0[5]])
+                new_rows.append(dt_row)
+                #
+                saving_Airlines, saving_Flights = [], []
+                dt0, loc0, row0 = dt1, loc1, row1
+                saving_Airlines.append(Airline)
+                saving_Flights.append(Flight)
+        dt_row = (dt0, [row0[0], ';'.join(saving_Airlines), ';'.join(saving_Flights),
+                        row0[3], row0[4], row0[5]])
+        new_rows.append(dt_row)
+        #
+        ymd_fpath = opath.join(DIR_PATHS['Summary'], '%s-%s-%s.csv' % (ymd, wd, IATA))
+        write_daySummary(ymd_fpath, new_rows)
 
 
 if __name__ == '__main__':
-    print('Crawling %s' % IATA)
-    run()
+    crawler_run()
