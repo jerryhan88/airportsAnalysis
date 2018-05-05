@@ -21,20 +21,6 @@ def crawler_run():
     crawl_CA(loc_dt)
 
 
-def run():
-    while True:
-        try:
-            loc_dt = get_loc_dt('Asia/Taipei')
-            crawl_PD(loc_dt)
-            crawl_PA(loc_dt)
-            crawl_CD(loc_dt)
-            crawl_CA(loc_dt)
-            time.sleep(DATA_COL_INTERVAL)
-        except:
-            time.sleep(DATA_COL_INTERVAL)
-            run()
-
-
 def crawl_PD(dt):
     fpath = opath.join(DIR_PATHS['Passenger', 'Departure'],
                        '%s-PD-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
@@ -73,7 +59,8 @@ def handle_flightsInfo(fpath, purpose, direction):
                   'Terminal',
                   'Gate/Check-inCounter' if direction == 'depart' else 'Gate/BaggageCarousel',
                   'PlaneType', 'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     url = 'https://www.taoyuan-airport.com/english/%s_%s' % (purpose, direction)
     html_elements = get_html_elements_byTime(url)
@@ -98,5 +85,4 @@ def handle_flightsInfo(fpath, purpose, direction):
 
 
 if __name__ == '__main__':
-    print('Crawling %s' % IATA)
-    run()
+    crawler_run()

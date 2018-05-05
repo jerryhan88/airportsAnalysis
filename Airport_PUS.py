@@ -19,17 +19,6 @@ def crawler_run():
     crawl_PA(loc_dt)
 
 
-def run():
-    while True:
-        try:
-            loc_dt = get_loc_dt('Asia/Seoul')
-            crawl_PD(loc_dt)
-            crawl_PA(loc_dt)
-            time.sleep(DATA_COL_INTERVAL)
-        except:
-            time.sleep(DATA_COL_INTERVAL)
-            run()
-
 def crawl_PD(dt):
     fpath = opath.join(DIR_PATHS['Passenger', 'Departure'],
                        '%s-PD-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
@@ -49,7 +38,8 @@ def crawl_PA(dt):
 def handle_flightsInfo(fpath, direction):
     new_header = ['Airline', 'FlightNumber', 'ScheduledTime', 'ChangedTime', 'Departure', 'Arrival',
                   'Classification', 'BoardingGate' if direction == 'departure' else 'Exit', 'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     url_postfix = '1&inoutType=OUT&cid=2016010821002807881&menuId=2195' if direction == 'departure' else '1&inoutType=IN&cid=2016010821004412692&menuId=2196'
     url = 'https://www.airport.co.kr/gimhaeeng/extra/liveSchedule/liveScheduleList/layOut.do?langType=%s' % url_postfix
@@ -71,5 +61,4 @@ def handle_flightsInfo(fpath, direction):
 
 
 if __name__ == '__main__':
-    print('Crawling %s' % IATA)
-    run()
+    crawler_run()

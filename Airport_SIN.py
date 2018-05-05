@@ -21,19 +21,6 @@ def crawler_run():
     crawl_CA(loc_dt)
 
 
-def run():
-    while True:
-        try:
-            loc_dt = get_loc_dt('Asia/Singapore')
-            crawl_PD(loc_dt)
-            crawl_PA(loc_dt)
-            crawl_CD(loc_dt)
-            crawl_CA(loc_dt)
-        except:
-            pass
-        time.sleep(DATA_COL_INTERVAL)
-
-
 def crawl_CD(dt):
     dt -= timedelta(days=1)
     fpath = opath.join(DIR_PATHS['Cargo', 'Departure'],
@@ -177,5 +164,4 @@ def crawl_PA(dt):
 
 
 if __name__ == '__main__':
-    print('Crawling %s' % IATA)
-    run()
+    crawler_run()

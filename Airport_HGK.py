@@ -35,7 +35,8 @@ def crawl_PD(dt):
                        '%s-PD-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
     new_header = ['Time', 'Airline', 'Flight',
                   'Destination', 'Terminal', 'CheckIn', 'TransferDesk', 'Gate', 'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     forWhat, direction = 'passenger', 'departures'
     all_entities = get_HGK_entities(forWhat, direction)
@@ -55,7 +56,8 @@ def crawl_PA(dt):
                        '%s-PA-%d%02d%02dH%02d.csv' % (IATA, dt.year, dt.month, dt.day, dt.hour))
     new_header = ['Time', 'Airline', 'Flight',
                   'Origin', 'ParkingStand', 'Hall', 'Belt', 'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     forWhat, direction = 'passenger', 'arrivals'
     all_entities = get_HGK_entities(forWhat, direction)
@@ -88,7 +90,8 @@ def crawl_cargoInfo(direction, fpath):
     new_header = ['Time', 'Airline', 'Flight',
                   'Destination' if direction == 'departures' else 'Origin',
                   'Status']
-    init_csv_file(fpath, new_header)
+    if not opath.exists(fpath):
+        init_csv_file(fpath, new_header)
     #
     forWhat = 'cargo'
     all_entities = get_HGK_entities(forWhat, direction)
